@@ -19,6 +19,18 @@ describe('getElementsByClassName', function(){
       var result = getElementsByClassName('targetClassName');
       var expectedNodeList = document.getElementsByClassName('targetClassName');
       var expectedArray = Array.prototype.slice.apply(expectedNodeList);
+
+      //FOR DEBUGGING
+      /*
+      console.log('Input    : ');
+      console.log(htmlString);
+      console.log('Expected : ');
+      console.log(expectedArray);
+      console.log('Actual   : ');
+      console.log(result);
+      console.log('---------------------');
+      */
+
       var equality = _.isEqual(result, expectedArray); // why can't we use `===` here?
       expect(equality).to.equal(true);
 
