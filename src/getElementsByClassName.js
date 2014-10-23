@@ -16,12 +16,7 @@ var getElementsByClassName = function(className){
   			var tClassList = domArray[i].classList;
   			
   			if (tClassList.length === 0) {
-  				var tName = domArray[i].classList[0];
   				var tChildNodes = domArray[i].childNodes; 
-  				
-  				if (tName === className) {
-  					answer.push(domArray[i]);
-  				}
   				
   				if (tChildNodes.length !== 0) {
   					getOneElementByClassName(tChildNodes);
@@ -49,14 +44,5 @@ var getElementsByClassName = function(className){
 
   getOneElementByClassName(document.childNodes);
 
-  
-
-  //console.log(document.childNodes[1].childNodes[2].childNodes[3].childNodes.length);
-
-  
-
-
   return answer;
-  
-
 };
