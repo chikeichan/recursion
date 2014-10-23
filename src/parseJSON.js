@@ -12,8 +12,6 @@ var parseJSON = function(json) {
   var answer;
   var escaped = false;
 
-
-
   //Construct an array deliminated by {}[],'"\:
   for (var i = 0; i < jsonArray.length; i++) {
     var temp = jsonArray[i];
@@ -40,36 +38,36 @@ var parseJSON = function(json) {
     }
   }
 
-  console.log(newArray);
-
   var parseNext = function(){
     token = newArray[index];
-    //console.log(index+" : "+token)
     index++;
-
     var temp;
+    
+    if(token!==undefined) {
 
-    if(token === '"' || token === "'" ) {
-      temp = parseString();
-    } else if (token.search(/[0-9]/) >= 0) {
-      temp = +token;
-    } else if (token === '[') {
-      temp = parseArray();
-    } else if (token === '{') {
-      temp = parseObject();
-    } else if (token === 'null') {
-      temp = null;
-    } else if (token === 'true') {
-      temp = true;
-    } else if (token === 'false') {
-      temp = false;
-    } else if (token === ' ') {
-      temp = parseNext();
+      if(token === '"' || token === "'" ) {
+        temp = parseString();
+      } else if (token.search(/[0-9]/) >= 0) {
+        temp = +token;
+      } else if (token === '[') {
+        temp = parseArray();
+      } else if (token === '{') {
+        temp = parseObject();
+      } else if (token === 'null') {
+        temp = null;
+      } else if (token === 'true') {
+        temp = true;
+      } else if (token === 'false') {
+        temp = false;
+      } else if (token === ' ') {
+        temp = parseNext();
+      } else {
+        temp = token;
+      }
     } else {
-      temp = token;
+      temp = undefined;
     }
-
-    console.log(temp);
+    token = temp;
     
     return temp;
   }
@@ -80,12 +78,13 @@ var parseJSON = function(json) {
       index++;
       return temp;
     } else {
-      while(newArray[index] !== ']') {
-        if(newArray[index] !== ',') {
-          temp.push(parseNext());
-        } else {
-          index++;
-        }
+      while(parseNext() !== ']' && token !== undefined) {
+        if(token !== ',') {          
+          temp.push(token);          
+        } 
+      }
+      if (token === undefined) {
+          temp = undefined;
       }
     }
 
@@ -97,21 +96,19 @@ var parseJSON = function(json) {
     var key;
     var value;
 
-    if (newArray[index] === '}') {
+    if (parseNext() === '}') {
       index++;
       return temp;
     } else {
-        while(parseNext() !== '}' || token === ',') {
-            //console.log(token);
+        while(token !== '}' && token !== undefined) {
             key = token;
-          if(newArray[index] !== ':') {
-            //alert('Require :');
-          } else {
-            index++;
+            if(parseNext() === ':') {
             temp[key] = parseNext();
-            //console.log(temp);
-          }
+            }
         }
+        if (token === undefined) {
+          temp = undefined;
+      }
     }
 
     return temp;
@@ -121,7 +118,7 @@ var parseJSON = function(json) {
     var temp = '';
     var escaped = false;
 
-    while(newArray[index]!=='"' && newArray[index]!=='"'){
+    while(newArray[index]!=='"' && newArray[index]!=='"' && index <= newArray.length){
         if(newArray[index]==='\\"' || newArray[index]==="\\'") {
           temp += newArray[index].charAt(1);
         } else {
@@ -136,8 +133,11 @@ var parseJSON = function(json) {
   }
 
   
-    answer = parseNext();
-  
+  answer = parseNext();
+
+  if(answer === undefined){
+    throw new SyntaxError;
+  }
 
   return answer;
 };
