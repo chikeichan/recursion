@@ -4,17 +4,39 @@
 // but you're not, so you'll write it from scratch:
 var parseJSON = function(json) {
   // your code goes here
-  var jsonArray = json.split(/([\[\],\'\"\{\}: ])/);
-  var newArray = []
+  var jsonArray = json.split(/([\[\],\'\"\{\}: \\])/);
+  var newArray = [];
+  var tempArray = [];
   var index = 0;
   var token;
   var answer;
+  var escaped = false;
 
 
-  //Construct an array deliminated by {}[],'":
+
+  //Construct an array deliminated by {}[],'"\:
   for (var i = 0; i < jsonArray.length; i++) {
-    if (jsonArray[i]!='') {
-      newArray.push(jsonArray[i]);
+    var temp = jsonArray[i];
+    if (temp!='') {
+      tempArray.push(temp);  
+    }
+  }
+
+  //Construct an array with consideration for escapes
+  for (var i = 0; i < tempArray.length; i++) {
+    var temp = tempArray[i];
+
+    if (!escaped && temp === '\\') {
+      escaped = true;
+    } else if (escaped) {
+      if(temp === '"' || temp === "'") {
+        newArray.push('\\'+temp);
+      } else {
+        newArray.push(temp);
+      }
+      escaped = false;
+    } else {
+      newArray.push(temp);
     }
   }
 
@@ -22,8 +44,11 @@ var parseJSON = function(json) {
 
   var parseNext = function(){
     token = newArray[index];
+    //console.log(index+" : "+token)
     index++;
+
     var temp;
+
     if(token === '"' || token === "'" ) {
       temp = parseString();
     } else if (token.search(/[0-9]/) >= 0) {
@@ -44,8 +69,8 @@ var parseJSON = function(json) {
       temp = token;
     }
 
-    //token = temp;
-
+    console.log(temp);
+    
     return temp;
   }
 
@@ -77,18 +102,14 @@ var parseJSON = function(json) {
       return temp;
     } else {
         while(parseNext() !== '}' || token === ',') {
-            //console.log(newArray[index]+index)
-            //if(token===','){
-            //  index++;
-            //}
+            //console.log(token);
             key = token;
           if(newArray[index] !== ':') {
             //alert('Require :');
           } else {
-            //console.log(newArray[index]+index)
             index++;
             temp[key] = parseNext();
-            //console.log(newArray[index]+index)
+            //console.log(temp);
           }
         }
     }
@@ -98,8 +119,15 @@ var parseJSON = function(json) {
 
   var parseString = function(){
     var temp = '';
+    var escaped = false;
+
     while(newArray[index]!=='"' && newArray[index]!=='"'){
-        temp += newArray[index];
+        if(newArray[index]==='\\"' || newArray[index]==="\\'") {
+          temp += newArray[index].charAt(1);
+        } else {
+          temp += newArray[index];
+        }
+
         index++;
     }
     index++;
